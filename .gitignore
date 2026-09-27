@@ -1,0 +1,10 @@
+# Gradle
+build/
+.gradle/
+_gradle/
+_gradle-home/
+
+# Scratch / downloaded artifacts
+_libs/
+_paperprobe/
+*.log

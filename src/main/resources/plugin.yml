@@ -1,0 +1,25 @@
+name: KingOfTheLadder
+version: '${project.version}'
+main: me.obvgreen.KingOfTheLadder
+api-version: '26.2'
+description: Knockback ladder minigame with Glicko-2 ratings, native dialogs and PlaceholderAPI leaderboards.
+author: KingOfTheLadder
+softdepend:
+  - PlaceholderAPI
+
+commands:
+  kotl:
+    description: King of the Ladder command.
+    usage: /kotl <setup|help|top|list|wand|create|setplate|spawn|toggle|delete>
+    aliases:
+      - kingoftheladder
+
+permissions:
+  kotl.admin:
+    description: Create, configure and toggle arenas.
+    default: op
+    children:
+      kotl.use: true
+  kotl.use:
+    description: View leaderboards and leaderboard dialogs.
+    default: true

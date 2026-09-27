@@ -1,0 +1,81 @@
+# King of the Ladder — configuration
+#
+# Arenas themselves are created in-game with /kotl wand + /kotl create and are stored
+# under the "arenas" key of this same file. Everything below is a gameplay default.
+
+arena:
+  # Automatically join an arena when a player walks into its region.
+  join-on-region-entry: true
+  # Game mode forced while inside an arena; the player's real mode is restored on exit.
+  game-mode: ADVENTURE
+  # Max health granted by the arena kit. Restored on exit.
+  max-health: 20.0
+
+kit:
+  # Armour order matters: setArmorContents expects boots, leggings, chestplate, helmet.
+  armour:
+    boots: LEATHER_BOOTS
+    leggings: LEATHER_LEGGINGS
+    chestplate: LEATHER_CHESTPLATE
+    helmet: LEATHER_HELMET
+  stick-material: STICK
+  # Hotbar slot (0-8) the Knockback I stick goes into.
+  stick-slot: 0
+  # Leather dye colour: a hex string such as "#FFC000", or a name (AQUA, RED, ...).
+  colour: "#FFC000"
+  stick-name: "<gold><bold>Knockback Stick"
+
+combat:
+  # A knockoff is attributed to the last player who hit the victim inside this window.
+  knockback-window-seconds: 5
+
+king:
+  claim-cooldown-seconds: 3
+  firework-count: 3
+  # Radial shove applied to every other player in the arena when a new King is crowned.
+  push-strength: 0.9
+  push-vertical: 0.6
+  no-king-text: "nobody"
+  broadcast: "<gold><player> <yellow>is the new King of <aqua><arena><yellow>!"
+  title:
+    main: "<gold><bold>YOU ARE KING"
+    subtitle: "<yellow>Hold the ladder!"
+  # Title timings, in milliseconds.
+  fade-in-millis: 200
+  stay-millis: 1400
+  fade-out-millis: 600
+
+leaderboard:
+  # How many rows the top-N cache holds and the leaderboard dialog shows.
+  size: 10
+  # How often the top-N cache is rebuilt. Runs off the main thread.
+  cache-seconds: 60
+
+glicko:
+  # The Glicko-2 system constant tau. The paper suggests 0.3-1.2; 0.5 is its own default and
+  # the value used in its worked example. Raise it if ratings swing too hard after a break.
+  tau: 0.5
+  # Rating deviation growth per day away from the ladder. Glicko-2's own inactivity term
+  # is defined for rating periods, not single games, so KotL widens the deviation on a
+  # schedule instead.
+  inactivity-growth-per-day: 40.0
+
+messages:
+  join: "<gray>You entered <white><arena><gray>."
+  leave: "<gray>You left <white><arena><gray>."
+  knocked-by: "<gray><white><player><gray> knocked you off in <white><arena><gray>."
+  knockoff: "<green>You knocked <white><player><green> off the ladder!"
+  self-knockoff: "<gray>You fell. No credit to anyone."
+  rating: "<gray>Rating <white><rating>"
+
+# Arenas are written here by /kotl create:
+#
+# arenas:
+#   tower:
+#     world: world
+#     bounds:
+#       min: "-20,64,-20"
+#       max: "20,128,20"
+#     spawn: "0,65,0"
+#     king-plate: "0,127,0"
+#     active: true
