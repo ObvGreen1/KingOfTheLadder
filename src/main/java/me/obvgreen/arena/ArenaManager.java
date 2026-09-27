@@ -1,13 +1,13 @@
 package me.obvgreen.arena;
 
 import me.obvgreen.KingOfTheLadder;
+import me.obvgreen.config.FileSettings;
 import me.obvgreen.database.DatabaseManager;
 import me.obvgreen.database.PlayerStats;
 import me.obvgreen.database.StatCategory;
 import me.obvgreen.glicko.GlickoManager;
 import me.obvgreen.glicko.GlickoRating;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
+import me.obvgreen.text.Text;
 import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -238,7 +238,7 @@ public final class ArenaManager {
 
         giveKit(player);
         teleportToSpawn(player, arena);
-        player.sendMessage(mini(settings.joinMessage().replace("<arena>", arena.name())));
+        player.sendMessage(Text.of(settings.joinMessage().replace("<arena>", arena.name())));
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0F, 1.6F);
     }
 
@@ -258,7 +258,7 @@ public final class ArenaManager {
         if (state != null) {
             state.restore(player);
             if (notify) {
-                player.sendMessage(mini(settings.leaveMessage()
+                player.sendMessage(Text.of(settings.leaveMessage()
                         .replace("<arena>", arena == null ? "the arena" : arena.name())));
             }
         }
@@ -315,7 +315,7 @@ public final class ArenaManager {
         ItemStack stick = new ItemStack(settings.kitStickMaterial());
         ItemMeta meta = stick.getItemMeta();
         if (meta != null) {
-            meta.displayName(mini(settings.kitStickName()));
+            meta.displayName(Text.of(settings.kitStickName()));
             meta.addEnchant(Enchantment.KNOCKBACK, 1, true);
             meta.setUnbreakable(true);
             stick.setItemMeta(meta);
@@ -365,16 +365,16 @@ public final class ArenaManager {
         teleportToSpawn(victim, arena);
 
         if (attacker == null) {
-            victim.sendMessage(mini(settings.selfKnockoffMessage()));
+            victim.sendMessage(Text.of(settings.selfKnockoffMessage()));
             return;
         }
         database.addCounter(attacker, StatCategory.KILLS, 1);
         applyCombatRating(attacker, victim);
 
-        victim.sendMessage(mini(settings.knockedByMessage()
+        victim.sendMessage(Text.of(settings.knockedByMessage()
                 .replace("<player>", attacker.getName())
                 .replace("<arena>", arena.name())));
-        attacker.sendMessage(mini(settings.knockoffMessage()
+        attacker.sendMessage(Text.of(settings.knockoffMessage()
                 .replace("<player>", victim.getName())
                 .replace("<arena>", arena.name())));
     }
@@ -394,16 +394,16 @@ public final class ArenaManager {
         PlayerStats winnerStats = database.get(winner);
         PlayerStats loserStats = database.get(loser);
         GlickoRating[] updated = glicko.rateMatch(
-                GlickoRating.of(winnerStats), GlickoRating.of(loserStats));
+                ratingOf(winnerStats), ratingOf(loserStats));
 
         GlickoRating newWinner = updated[0];
         GlickoRating newLoser = updated[1];
         database.applyRating(winner, newWinner.rating(), newWinner.deviation(), newWinner.volatility());
         database.applyRating(loser, newLoser.rating(), newLoser.deviation(), newLoser.volatility());
 
-        winner.sendMessage(mini(settings.ratingMessage()
+        winner.sendMessage(Text.of(settings.ratingMessage()
                 .replace("<rating>", formatSigned(newWinner.rating() - winnerStats.rating()))));
-        loser.sendMessage(mini(settings.ratingMessage()
+        loser.sendMessage(Text.of(settings.ratingMessage()
                 .replace("<rating>", formatSigned(newLoser.rating() - loserStats.rating()))));
     }
 
@@ -490,8 +490,8 @@ public final class ArenaManager {
         database.addCounter(player, StatCategory.WINS, 1);
 
         player.showTitle(Title.title(
-                mini(settings.kingTitle()),
-                mini(settings.kingSubtitle()),
+                Text.of(settings.kingTitle()),
+                Text.of(settings.kingSubtitle()),
                 Title.Times.times(
                         Duration.ofMillis(settings.titleFadeInMillis()),
                         Duration.ofMillis(settings.titleStayMillis()),
@@ -499,7 +499,7 @@ public final class ArenaManager {
         player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1.0F, 1.2F);
 
         Location plate = arena.kingPlate().toLocation(player.getWorld());
-        Bukkit.broadcast(mini(settings.kingBroadcast()
+        Bukkit.broadcast(Text.of(settings.kingBroadcast()
                 .replace("<player>", player.getName())
                 .replace("<arena>", arena.name())));
         spawnFireworks(plate, settings.kingFireworkCount());
@@ -641,10 +641,10 @@ public final class ArenaManager {
 
     // ------------------------------------------------------------------ small helpers
 
-    public static Component mini(String raw) {
-        return MiniMessage.miniMessage().deserialize(raw);
+    /** Adapts a stored stat row to the pure rating value the maths works in. */
+    private static GlickoRating ratingOf(PlayerStats stats) {
+        return new GlickoRating(stats.rating(), stats.ratingDeviation(), stats.volatility());
     }
-
 
     private record PendingHit(UUID attacker, long atMillis) {
     }

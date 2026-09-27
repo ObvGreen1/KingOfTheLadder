@@ -1,7 +1,7 @@
 package me.obvgreen.dialog;
 
 import me.obvgreen.KingOfTheLadder;
-import me.obvgreen.arena.ArenaManager;
+import me.obvgreen.text.Text;
 import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.dialog.DialogResponseView;
 import io.papermc.paper.registry.data.dialog.ActionButton;
@@ -98,11 +98,11 @@ public final class DialogView {
 
     /** A component for a title, button label or tooltip. */
     public static Component text(String miniMessage) {
-        return ArenaManager.mini(miniMessage);
+        return Text.of(miniMessage);
     }
 
     public static DialogBody line(String miniMessage) {
-        return buttons().plainMessageDialogBody(ArenaManager.mini(miniMessage), BODY_WIDTH);
+        return buttons().plainMessageDialogBody(Text.of(miniMessage), BODY_WIDTH);
     }
 
     public static DialogBody line(Component component) {

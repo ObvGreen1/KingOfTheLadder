@@ -1,4 +1,4 @@
-package me.obvgreen.arena;
+package me.obvgreen.config;
 
 import org.bukkit.Color;
 import org.bukkit.GameMode;

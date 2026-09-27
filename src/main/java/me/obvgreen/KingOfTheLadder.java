@@ -1,7 +1,7 @@
 package me.obvgreen;
 
 import me.obvgreen.arena.ArenaManager;
-import me.obvgreen.arena.FileSettings;
+import me.obvgreen.config.FileSettings;
 import me.obvgreen.command.CommandRegistry;
 import me.obvgreen.command.KotLCommand;
 import me.obvgreen.database.DatabaseManager;

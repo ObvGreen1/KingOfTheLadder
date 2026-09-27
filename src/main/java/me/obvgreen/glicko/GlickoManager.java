@@ -25,11 +25,6 @@ import java.util.List;
  */
 public final class GlickoManager {
 
-    public static final double DEFAULT_RATING = 1500.0;
-    public static final double DEFAULT_RATING_DEVIATION = 350.0;
-
-    /** The paper's step 1(a) starting volatility for an unrated player. */
-    public static final double DEFAULT_VOLATILITY = 0.06;
 
     /**
      * The Glicko-2 scale constant: step 2 defines
@@ -259,11 +254,8 @@ public final class GlickoManager {
     }
 
     public static double toGlickmanScale(double rating) {
-        return (rating - DEFAULT_RATING) / SCALE;
+        return (rating - GlickoRating.DEFAULT_RATING) / SCALE;
     }
-
-    /**
-     * Step 2: {@code phi = RD / 173.7178}.
 
     /**
      * Step 2: {@code phi = RD / 173.7178}.
@@ -283,7 +275,7 @@ public final class GlickoManager {
     }
 
     public static double fromGlickmanScale(double scaled) {
-        return SCALE * scaled + DEFAULT_RATING;
+        return SCALE * scaled + GlickoRating.DEFAULT_RATING;
     }
 
     // ------------------------------------------------------------------ helpers

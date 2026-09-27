@@ -3,6 +3,7 @@ package me.obvgreen.listener;
 import me.obvgreen.arena.ArenaManager;
 import me.obvgreen.arena.BlockPos;
 import me.obvgreen.item.SelectionWand;
+import me.obvgreen.text.Text;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -56,14 +57,14 @@ public final class SelectionWandListener implements Listener {
         BlockPos pos = BlockPos.of(block);
         if (action == Action.LEFT_CLICK_BLOCK) {
             arenas.setSelectionFirst(player, pos);
-            player.sendMessage(ArenaManager.mini("<gray>Position 1 set to <white>" + pos));
+            player.sendMessage(Text.of("<gray>Position 1 set to <white>" + pos));
             return;
         }
 
         arenas.setSelectionSecond(player, pos);
-        player.sendMessage(ArenaManager.mini("<gray>Position 2 set to <white>" + pos));
+        player.sendMessage(Text.of("<gray>Position 2 set to <white>" + pos));
         if (arenas.selection(player).complete()) {
-            player.sendMessage(ArenaManager.mini(
+            player.sendMessage(Text.of(
                     "<green>Selection complete. <gray>Run <white>/kotl create <name>"
                             + "<gray>, or use <white>/kotl setup<gray>."));
         }

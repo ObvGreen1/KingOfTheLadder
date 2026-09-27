@@ -1,8 +1,5 @@
-package me.obvgreen.command.sub;
+package me.obvgreen.command;
 
-import me.obvgreen.command.CommandContext;
-import me.obvgreen.command.CommandRegistry;
-import me.obvgreen.command.KotlSubcommand;
 
 import java.util.List;
 

@@ -1,5 +1,7 @@
 package me.obvgreen.database;
 
+import me.obvgreen.glicko.GlickoRating;
+
 import java.util.UUID;
 
 /**
@@ -20,9 +22,9 @@ public record PlayerStats(
 
     public static PlayerStats defaults(UUID uuid, String name) {
         return new PlayerStats(uuid, name, 0, 0, 0,
-                me.obvgreen.glicko.GlickoManager.DEFAULT_RATING,
-                me.obvgreen.glicko.GlickoManager.DEFAULT_RATING_DEVIATION,
-                me.obvgreen.glicko.GlickoManager.DEFAULT_VOLATILITY);
+                GlickoRating.DEFAULT_RATING,
+                GlickoRating.DEFAULT_RATING_DEVIATION,
+                GlickoRating.DEFAULT_VOLATILITY);
     }
 
     public PlayerStats withName(String newName) {

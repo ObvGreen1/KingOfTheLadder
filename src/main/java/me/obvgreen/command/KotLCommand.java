@@ -1,7 +1,6 @@
 package me.obvgreen.command;
 
 import me.obvgreen.KingOfTheLadder;
-import me.obvgreen.command.sub.HelpCommand;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

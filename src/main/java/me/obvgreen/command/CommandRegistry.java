@@ -1,15 +1,5 @@
 package me.obvgreen.command;
 
-import me.obvgreen.command.sub.CreateCommand;
-import me.obvgreen.command.sub.DeleteCommand;
-import me.obvgreen.command.sub.HelpCommand;
-import me.obvgreen.command.sub.ListArenasCommand;
-import me.obvgreen.command.sub.SetPlateCommand;
-import me.obvgreen.command.sub.SetSpawnCommand;
-import me.obvgreen.command.sub.SetupCommand;
-import me.obvgreen.command.sub.ToggleCommand;
-import me.obvgreen.command.sub.TopCommand;
-import me.obvgreen.command.sub.WandCommand;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -67,7 +57,7 @@ public final class CommandRegistry {
     }
 
     /** The names of every subcommand {@code sender} is allowed to see. */
-    public List<String> visibleTo(me.obvgreen.command.CommandContext context) {
+    public List<String> visibleTo(CommandContext context) {
         List<String> names = new ArrayList<>();
         for (KotlSubcommand subcommand : subcommands) {
             String permission = subcommand.permission();

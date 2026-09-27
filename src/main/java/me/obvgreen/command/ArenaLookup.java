@@ -1,7 +1,6 @@
-package me.obvgreen.command.sub;
+package me.obvgreen.command;
 
 import me.obvgreen.arena.Arena;
-import me.obvgreen.command.CommandContext;
 
 import java.util.ArrayList;
 import java.util.List;

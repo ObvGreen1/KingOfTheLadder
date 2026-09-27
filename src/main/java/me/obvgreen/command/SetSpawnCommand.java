@@ -1,10 +1,7 @@
-package me.obvgreen.command.sub;
+package me.obvgreen.command;
 
 import me.obvgreen.arena.Arena;
 import me.obvgreen.arena.BlockPos;
-import me.obvgreen.command.CommandContext;
-import me.obvgreen.command.CommandPermissions;
-import me.obvgreen.command.KotlSubcommand;
 import org.bukkit.entity.Player;
 
 import java.util.List;

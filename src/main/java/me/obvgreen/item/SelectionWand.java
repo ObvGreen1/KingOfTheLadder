@@ -1,6 +1,6 @@
 package me.obvgreen.item;
 
-import me.obvgreen.arena.ArenaManager;
+import me.obvgreen.text.Text;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
@@ -48,7 +48,7 @@ public final class SelectionWand {
         ItemStack wand = new ItemStack(Material.FEATHER);
         ItemMeta meta = wand.getItemMeta();
         if (meta != null) {
-            meta.displayName(ArenaManager.mini("<gold><bold>KotL Selection Wand"));
+            meta.displayName(Text.of("<gold><bold>KotL Selection Wand"));
             meta.getPersistentDataContainer().set(key, PersistentDataType.BYTE, (byte) 1);
             meta.addEnchant(Enchantment.UNBREAKING, 1, true);
             meta.setUnbreakable(true);

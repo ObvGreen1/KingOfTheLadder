@@ -58,13 +58,14 @@ tasks.jar {
     archiveFileName.set("KingOfTheLadder-${project.version}.jar")
 }
 
-// --------------------------------------------------------------------------- rating check
-// tools/GlickoCheck.java asserts the eight Glicko-2 steps against the worked example in
-// Mark Glickman's own paper. It is not a JUnit test: it needs no test framework, prints each
-// assertion as it goes, and exits non-zero on the first failure by throwing.
+// The two verification tasks below run the standalone checks in tools/. Neither is a JUnit test:
+// each needs no test framework, prints every assertion as it goes, and exits non-zero on the
+// first failure by throwing. The plugin classes plus paper-api and adventure-api are enough to run
+// them, so no test-only dependency is added.
 //
-// The plugin classes plus paper-api and adventure-api are enough to run it, so no test-only
-// dependency is added.
+// GlickoCheck asserts the eight Glicko-2 steps against the worked example in Mark Glickman's own
+// paper. PackageCheck enforces the package layout: files in the directory their package declares,
+// no fully-qualified plugin references, only declared cross-package dependencies, and no cycles.
 // Shared with the verification tasks below so every compile and every run uses the same JDK 25,
 // whatever JVM Gradle itself happens to be running under.
 val jdk25Compiler = javaToolchains.compilerFor {
@@ -103,4 +104,23 @@ val checkGlicko = tasks.register<JavaExec>("checkGlicko") {
     )
     mainClass.set("GlickoCheck")
     javaLauncher.set(jdk25Launcher)
+}
+
+// tools/PackageCheck.java guards the package layout. It reads the source tree from disk, so it
+// runs from the project directory and needs nothing on the classpath.
+val checkPackages = tasks.register<JavaExec>("checkPackages") {
+    group = "verification"
+    description = "Verifies the package layout: file paths, imports, declared dependencies, cycles."
+
+    dependsOn(compileTools)
+    classpath = files(layout.buildDirectory.dir("tools"))
+    mainClass.set("PackageCheck")
+    javaLauncher.set(jdk25Launcher)
+    workingDir = projectDir
+}
+
+// `build` runs the layout check, so a misplaced class or an undeclared dependency fails the
+// build rather than waiting to be noticed in review.
+tasks.named("check") {
+    dependsOn(checkPackages)
 }

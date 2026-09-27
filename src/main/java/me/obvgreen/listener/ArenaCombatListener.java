@@ -1,6 +1,7 @@
 package me.obvgreen.listener;
 
 import me.obvgreen.arena.ArenaManager;
+import me.obvgreen.text.Text;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -42,7 +43,7 @@ public final class ArenaCombatListener implements Listener {
 
         event.setCancelled(true);
         if (attacker != null) {
-            attacker.sendMessage(ArenaManager.mini(
+            attacker.sendMessage(Text.of(
                     "<gray>You cannot attack players outside an arena."));
         }
     }

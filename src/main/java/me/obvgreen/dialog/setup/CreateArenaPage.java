@@ -3,8 +3,9 @@ package me.obvgreen.dialog.setup;
 import me.obvgreen.KingOfTheLadder;
 import me.obvgreen.arena.ArenaManager;
 import me.obvgreen.arena.BlockPos;
-import me.obvgreen.command.sub.CreateCommand;
+import me.obvgreen.command.CreateCommand;
 import me.obvgreen.dialog.DialogView;
+import me.obvgreen.text.Text;
 import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.body.DialogBody;
 import io.papermc.paper.registry.data.dialog.input.DialogInput;
@@ -76,7 +77,7 @@ final class CreateArenaPage {
                 view.onSubmit((clicker, response) -> {
                     String name = response.getText(NAME_KEY);
                     if (name == null || name.isBlank()) {
-                        clicker.sendMessage(me.obvgreen.arena.ArenaManager.mini(
+                        clicker.sendMessage(Text.of(
                                 "<red>Type a name for the arena first."));
                         open(clicker);
                         return;

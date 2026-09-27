@@ -2,6 +2,7 @@ package me.obvgreen.command;
 
 import me.obvgreen.KingOfTheLadder;
 import me.obvgreen.arena.ArenaManager;
+import me.obvgreen.text.Text;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -95,7 +96,7 @@ public final class CommandContext {
 
     /** Sends a MiniMessage-formatted line to the sender. */
     public void reply(String miniMessage) {
-        sender.sendMessage(ArenaManager.mini(miniMessage));
+        sender.sendMessage(Text.of(miniMessage));
     }
 
     public void success(String miniMessage) {

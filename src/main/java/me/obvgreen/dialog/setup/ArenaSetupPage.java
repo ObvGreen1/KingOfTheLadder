@@ -3,9 +3,10 @@ package me.obvgreen.dialog.setup;
 import me.obvgreen.KingOfTheLadder;
 import me.obvgreen.arena.Arena;
 import me.obvgreen.arena.ArenaManager;
-import me.obvgreen.command.sub.DeleteCommand;
-import me.obvgreen.command.sub.SetPlateCommand;
+import me.obvgreen.command.DeleteCommand;
+import me.obvgreen.command.SetPlateCommand;
 import me.obvgreen.dialog.DialogView;
+import me.obvgreen.text.Text;
 import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.body.DialogBody;
 import io.papermc.paper.registry.data.dialog.type.DialogType;
@@ -37,7 +38,7 @@ final class ArenaSetupPage {
         ArenaManager arenas = plugin.arenas();
         Optional<Arena> found = arenas.byName(arenaName);
         if (found.isEmpty()) {
-            player.sendMessage(ArenaManager.mini(
+            player.sendMessage(Text.of(
                     "<red>No arena called <white>" + arenaName + "<red> any more."));
             new SetupDialogs(plugin, view).open(player);
             return;

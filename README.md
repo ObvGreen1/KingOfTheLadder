@@ -190,29 +190,43 @@ placeholder lookups and rank queries are memory reads.
 ```
 src/main/java/me/obvgreen/
   KingOfTheLadder.java            plugin entry point, wires the graph, registers listeners
+  config/FileSettings.java        config.yml parsed once at enable into an immutable record
+  text/Text.java                  the one place a MiniMessage string becomes a Component
   arena/                          Arena, bounds, saved state, and the ArenaManager that owns the game
-  command/
-    CommandContext.java           thin wrapper around sender, label, args, reply helpers
-    CommandPermissions.java       kotl.use / kotl.admin constants
-    CommandRegistry.java          subcommand lookup table (name + aliases)
-    KotLCommand.java              dispatcher (checks perms, validates player, forwards)
-    KotlSubcommand.java           interface every subcommand implements
-    sub/                          one class per subcommand: Setup, Help, Top, ListArenas,
-                                  Wand, Create, SetPlate, SetSpawn, Toggle, Delete
+  command/                        dispatcher, permission and context types, the registry, and one
+                                  class per subcommand (Setup, Help, Top, ListArenas, Wand, Create,
+                                  SetPlate, SetSpawn, Toggle, Delete)
   database/                       SQLite (WAL), PlayerStats, StatCategory, RankEntry
   dialog/
     DialogView.java               shared registry-dialog plumbing
     DialogManager.java            leaderboard dialog
     PlaceholderCache.java         async top-N cache
     setup/                        guided setup wizard (SetupDialogs, ArenaSetupPage, CreateArenaPage)
-  glicko/                         Glicko-2, steps 1-8
+  glicko/                         Glicko-2, steps 1-8; GlickoRating is a pure value type
   item/SelectionWand.java         the selection wand item stack
   listener/                       one class per event type: ArenaMoveListener,
                                   ArenaCombatListener, ArenaDeathListener, ArenaRespawnListener,
                                   ArenaQuitListener, KingPlateListener, SelectionWandListener
   placeholder/                    the %kotl_*% expansion
-tools/GlickoCheck.java            standalone check of the rating maths
+tools/
+  GlickoCheck.java                standalone check of the rating maths
+  PackageCheck.java               standalone check of the package layout
 ```
+
+### Package rules
+
+`config`, `glicko` and `text` are leaves: they import nothing from the plugin at all. Everything
+else may only depend on what is listed in `ALLOWED` in `tools/PackageCheck.java`, and apart from
+the composition root the package graph must stay acyclic. A shared helper belongs in a package
+both callers may already use — `Text.of` rather than a `mini` method parked on a manager.
+
+```powershell
+.\gradlew.bat checkPackages
+```
+
+`build` runs it, so a class in the wrong package, a fully-qualified cross-package call or an
+undeclared dependency fails the build instead of waiting to be noticed in review.
+
 The managers are built in dependency order — ratings, then storage, then arenas, then the
 placeholder cache, then dialogs — and the plugin enables the expansion only if PlaceholderAPI
 is actually present.
