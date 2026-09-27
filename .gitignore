@@ -3,8 +3,33 @@ build/
 .gradle/
 _gradle/
 _gradle-home/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+nbproject/private/
+out/
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
 
 # Scratch / downloaded artifacts
 _libs/
 _paperprobe/
 *.log
+
+# Runtime data
+*.db
+*.db-shm
+*.db-wal
+run/
+logs/

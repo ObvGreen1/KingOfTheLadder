@@ -18,8 +18,9 @@ Paper 26.2 ships the SQLite JDBC driver and PlaceholderAPI is declared `softdepe
 is shaded into the jar.
 
 > The build uses a Java **toolchain** pinned to 25, so a JDK 25 must be installed
-> somewhere on the machine, but `JAVA_HOME` does not matter. To point it at a specific
-> install without editing anything else, set it in `gradle.properties`:
+> somewhere on the machine, but `JAVA_HOME` does not matter — Gradle finds the JDK itself.
+> To pin one specific install instead, uncomment the `org.gradle.java.installations.paths`
+> line in `gradle.properties`:
 > ```properties
 > org.gradle.java.installations.paths=C:\\path\\to\\jdk-25
 > ```
@@ -187,7 +188,7 @@ placeholder lookups and rank queries are memory reads.
 ## Project layout
 
 ```
-src/main/java/com/kotl/
+src/main/java/me/obvgreen/
   KingOfTheLadder.java            plugin entry point, wires the graph, registers listeners
   arena/                          Arena, bounds, saved state, and the ArenaManager that owns the game
   command/
@@ -235,3 +236,19 @@ repo.extendedclip.com are the plain jar rather than the shadow jar, so they are 
 bundled bStats and Adventure dependencies and fail with
 `NoClassDefFoundError: org/bstats/charts/CustomChart`. This is an upstream packaging issue,
 not a KotL one. Use a bundled build, or repack the plain jar with its declared dependencies.
+
+---
+
+## Further reading
+
+- [`docs/PROMPT.md`](docs/PROMPT.md) — the original specification this plugin was built from.
+- [`docs/DIALOG_CROSSHAIR_FIX.md`](docs/DIALOG_CROSSHAIR_FIX.md) — why every `DialogBase` uses
+  `pause(false)` and `afterAction(NONE)`, so opening a dialog does not snap the crosshair back to
+  the centre of the screen.
+
+---
+
+## License
+
+MIT — see [`LICENSE`](LICENSE).
+

@@ -2,9 +2,12 @@
 // Only the `java` plugin is applied: this is a plain dependency-resolution build
 // against paper-api, no paperweight / run-paper plugins.
 
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
 plugins {
     java
 }
+
 
 // Coordinates. Must match plugin.yml's name and the jar name below.
 group = "me.obvgreen"
@@ -62,26 +65,42 @@ tasks.jar {
 //
 // The plugin classes plus paper-api and adventure-api are enough to run it, so no test-only
 // dependency is added.
-val compileTools by tasks.registering(JavaCompile::class) {
+// Shared with the verification tasks below so every compile and every run uses the same JDK 25,
+// whatever JVM Gradle itself happens to be running under.
+val jdk25Compiler = javaToolchains.compilerFor {
+    languageVersion.set(JavaLanguageVersion.of(25))
+}
+val jdk25Launcher = javaToolchains.launcherFor {
+    languageVersion.set(JavaLanguageVersion.of(25))
+}
+
+val compileTools = tasks.register<JavaCompile>("compileTools") {
     group = "verification"
     description = "Compiles the standalone rating check in tools/."
 
     source = fileTree("tools") { include("*.java") }
     destinationDirectory.set(layout.buildDirectory.dir("tools"))
-    classpath = sourceSets.main.get().output + configurations.compileClasspath.get()
+    classpath = files(
+        sourceSets.main.get().output,
+        configurations.compileClasspath
+    )
+    javaCompiler.set(jdk25Compiler)
     options.release.set(25)
     options.encoding = "UTF-8"
 }
 
-val checkGlicko by tasks.registering(JavaExec::class) {
+val checkGlicko = tasks.register<JavaExec>("checkGlicko") {
     group = "verification"
     description = "Verifies the Glicko-2 implementation against the paper's worked example."
 
     dependsOn(compileTools)
     // compileClasspath, not runtimeClasspath: every dependency is compileOnly, so the
     // runtime configuration is deliberately empty.
-    classpath = files(layout.buildDirectory.dir("tools")) +
-            sourceSets.main.get().output +
-            configurations.compileClasspath.get()
+    classpath = files(
+        layout.buildDirectory.dir("tools"),
+        sourceSets.main.get().output,
+        configurations.compileClasspath
+    )
     mainClass.set("GlickoCheck")
+    javaLauncher.set(jdk25Launcher)
 }
