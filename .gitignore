@@ -33,7 +33,3 @@ _paperprobe/
 *.db-wal
 run/
 logs/
-
-# Scratch notes; the real copies live in docs/
-/PROMPT.md
-/DIALOG_CROSSHAIR_FIX.md

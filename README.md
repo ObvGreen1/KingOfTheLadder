@@ -253,15 +253,6 @@ not a KotL one. Use a bundled build, or repack the plain jar with its declared d
 
 ---
 
-## Further reading
-
-- [`docs/PROMPT.md`](docs/PROMPT.md) — the original specification this plugin was built from.
-- [`docs/DIALOG_CROSSHAIR_FIX.md`](docs/DIALOG_CROSSHAIR_FIX.md) — why every `DialogBase` uses
-  `pause(false)` and `afterAction(NONE)`, so opening a dialog does not snap the crosshair back to
-  the centre of the screen.
-
----
-
 ## License
 
 MIT — see [`LICENSE`](LICENSE).
