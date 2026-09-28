@@ -10,7 +10,7 @@ softdepend:
 commands:
   kotl:
     description: King of the Ladder command.
-    usage: /kotl <setup|help|top|list|wand|create|setplate|spawn|toggle|delete>
+    usage: /kotl <setup|help|top|list|wand|create|setplate|respawn|toggle|delete>
     aliases:
       - kingoftheladder
 

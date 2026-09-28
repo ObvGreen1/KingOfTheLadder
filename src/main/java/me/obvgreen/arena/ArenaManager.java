@@ -103,12 +103,11 @@ public final class ArenaManager {
         }
         BlockPos min = parsePos(plugin.getConfig().getString(path + "bounds.min"), world);
         BlockPos max = parsePos(plugin.getConfig().getString(path + "bounds.max"), world);
-        BlockPos spawn = parsePos(plugin.getConfig().getString(path + "spawn"), world);
         String plate = plugin.getConfig().getString(path + "king-plate");
         if (min == null || max == null) {
             throw new IllegalArgumentException("missing bounds");
         }
-        return Arena.of(name, world, min, max, spawn == null ? min : spawn,
+        return Arena.of(name, world, min, max, parseRespawn(path, world),
                 plate == null || plate.isBlank() ? null : parsePos(plate, world),
                 plugin.getConfig().getBoolean(path + "active", true));
     }
@@ -128,6 +127,21 @@ public final class ArenaManager {
                 Integer.parseInt(parts[2].trim()));
     }
 
+    /**
+     * The configured respawn point, or {@code null} when none was ever set.
+     *
+     * <p>Reads {@code respawn} and falls back to the legacy {@code spawn} key so a config written
+     * before the rename still loads. {@link #saveArena} drops the old key the first time it
+     * writes, so the fallback is a one-way migration rather than a second source of truth.</p>
+     */
+    private BlockPos parseRespawn(String path, String world) {
+        BlockPos respawn = parsePos(plugin.getConfig().getString(path + "respawn"), world);
+        if (respawn == null) {
+            respawn = parsePos(plugin.getConfig().getString(path + "spawn"), world);
+        }
+        return respawn;
+    }
+
     public void saveArena(Arena arena) {
         arenas.put(arena.name().toLowerCase(Locale.ROOT), arena);
         String path = ARENA_ROOT + "." + arena.name() + ".";
@@ -136,9 +150,10 @@ public final class ArenaManager {
                 arena.minX() + "," + arena.minY() + "," + arena.minZ());
         plugin.getConfig().set(path + "bounds.max",
                 arena.maxX() + "," + arena.maxY() + "," + arena.maxZ());
-        BlockPos spawn = arena.spawnOrCentre();
-        plugin.getConfig().set(path + "spawn",
-                spawn.x() + "," + spawn.y() + "," + spawn.z());
+        BlockPos respawn = arena.respawnOrCentre();
+        plugin.getConfig().set(path + "respawn",
+                respawn.x() + "," + respawn.y() + "," + respawn.z());
+        plugin.getConfig().set(path + "spawn", null);
         if (arena.kingPlate() == null) {
             plugin.getConfig().set(path + "king-plate", null);
         } else {
@@ -200,10 +215,11 @@ public final class ArenaManager {
     }
 
     /**
-     * Puts {@code player} into {@code arena}: snapshot, strip, kit, teleport.
+     * Puts {@code player} into {@code arena}: snapshot, strip, kit. They are not moved - they got
+     * here by walking in, and the arena is wherever they already are standing.
      *
      * <p>Idempotent per arena, and a player already inside a different arena is moved across
-     * rather than double-snapshotted â€” a re-entrant region event must never leak the first
+     * rather than double-snapshotted, so a re-entrant region event can never leak the first
      * inventory.</p>
      */
     public void join(Player player, Arena arena) {
@@ -237,13 +253,16 @@ public final class ArenaManager {
         player.setHealth(settings.arenaMaxHealth());
 
         giveKit(player);
-        teleportToSpawn(player, arena);
         player.sendMessage(Text.of(settings.joinMessage().replace("<arena>", arena.name())));
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0F, 1.6F);
     }
 
     /**
      * Removes {@code player} from whatever arena they are in and replays their snapshot.
+     *
+     * <p>They keep standing where they are. Walking out of a region, being ejected from a
+     * disabled arena and quitting all restore the inventory in place, so no transition can put a
+     * player back on the wrong side of a region boundary.</p>
      *
      * @param notify whether to send the leave message; {@code false} on shutdown and on kick
      */
@@ -327,8 +346,9 @@ public final class ArenaManager {
 
     /**
      * Called from the move listener. Handles the three transitions a player can make:
-     * knocked off the bottom (respawn in-arena), left the region (restore), or entered one
-     * (join).
+     * knocked off the bottom (back to the respawn point), left the region (restore), or
+     * entered one (join). Only the knockoff moves anybody: joining and leaving change the
+     * inventory, the vitals and the game mode, and nothing else.
      */
     public void handleMove(Player player, Location to) {
         String current = membership.get(player.getUniqueId());
@@ -354,15 +374,21 @@ public final class ArenaManager {
     }
 
     /**
-     * A knockoff: attribute it to the last player who hit the victim, respawn them at the
-     * arena spawn, and re-rate both sides.
+     * A knockoff: heal the victim, put them back on the respawn point, and score it.
      */
     public void handleKnockoff(Player victim, Arena arena) {
-        Player attacker = consumeAttacker(victim).orElse(null);
-
-        database.addCounter(victim, StatCategory.DEATHS, 1);
         healFully(victim);
-        teleportToSpawn(victim, arena);
+        teleportToRespawn(victim, arena);
+        scoreKnockoff(victim, arena);
+    }
+
+    /**
+     * The part of a knockoff that happens either way: credit the last attacker, count the
+     * death, re-rate both sides, and say so.
+     */
+    private void scoreKnockoff(Player victim, Arena arena) {
+        Player attacker = consumeAttacker(victim).orElse(null);
+        database.addCounter(victim, StatCategory.DEATHS, 1);
 
         if (attacker == null) {
             victim.sendMessage(Text.of(settings.selfKnockoffMessage()));
@@ -379,9 +405,15 @@ public final class ArenaManager {
                 .replace("<arena>", arena.name())));
     }
 
-    /** A player's death inside the arena: attribute it, then heal and respawn them. */
+    /**
+     * A player's death inside the arena.
+     *
+     * <p>Scoring only. The victim is already dead, so moving them here would be undone by the
+     * respawn a moment later; {@code ArenaRespawnListener} puts them on the arena's respawn
+     * point instead.</p>
+     */
     public void handleDeath(Player victim, Arena arena) {
-        handleKnockoff(victim, arena);
+        scoreKnockoff(victim, arena);
     }
 
     /**
@@ -559,14 +591,20 @@ public final class ArenaManager {
 
     // ------------------------------------------------------------------ teleport helpers
 
-    public void teleportToSpawn(Player player, Arena arena) {
+    /**
+     * Puts {@code player} back on the arena's respawn point.
+     *
+     * <p>Only a knockoff uses this. Walking into a region and walking back out both leave the
+     * player exactly where they are standing.</p>
+     */
+    public void teleportToRespawn(Player player, Arena arena) {
         Optional<World> world = arena.resolveWorld();
         if (world.isEmpty()) {
             plugin.getLogger().warning("Cannot teleport " + player.getName()
                     + " into '" + arena.name() + "': world '" + arena.world() + "' is not loaded.");
             return;
         }
-        player.teleport(arena.spawnOrCentre().toLocation(world.get()));
+        player.teleport(arena.respawnOrCentre().toLocation(world.get()));
         player.setFallDistance(0.0F);
     }
 

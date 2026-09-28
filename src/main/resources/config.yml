@@ -4,7 +4,10 @@
 # under the "arenas" key of this same file. Everything below is a gameplay default.
 
 arena:
-  # Automatically join an arena when a player walks into its region.
+  # Automatically join an arena when a player walks into its region. Walking in never
+  # teleports anybody: the kit is handed over in place, and walking out hands the real
+  # inventory back in place. Players come back to the arena's respawn point after a death
+  # or a knockoff, and nowhere else.
   join-on-region-entry: true
   # Game mode forced while inside an arena; the player's real mode is restored on exit.
   game-mode: ADVENTURE
@@ -76,6 +79,6 @@ messages:
 #     bounds:
 #       min: "-20,64,-20"
 #       max: "20,128,20"
-#     spawn: "0,65,0"
+#     respawn: "0,65,0"
 #     king-plate: "0,127,0"
 #     active: true

@@ -39,7 +39,7 @@ final class CreateArenaPage {
 
         List<DialogBody> body = new ArrayList<>();
         body.add(DialogView.line("<gray>An arena is the box between two opposite corners. The "
-                + "floor is the bottom of the box: falling below it puts you back on the spawn "
+                + "floor is the bottom of the box: falling below it puts you back on the respawn "
                 + "point and keeps you in the game."));
         body.add(DialogView.gap());
         body.add(DialogView.line(selection.first() == null
@@ -58,8 +58,8 @@ final class CreateArenaPage {
         } else {
             body.add(DialogView.line("<green>Ready. The arena will span "
                     + describe(selection) + "."));
-            body.add(DialogView.line("<gray>You will be teleported nowhere — players are pulled in "
-                    + "when they walk into the region."));
+            body.add(DialogView.line("<gray>Nobody is teleported: players are pulled in when they walk "
+                    + "into the region, and get their own items back when they walk out."));
         }
 
         List<DialogInput> inputs = List.of(

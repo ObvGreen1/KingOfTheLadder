@@ -1,7 +1,6 @@
 package me.obvgreen.arena;
 
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
@@ -17,8 +16,13 @@ import java.util.List;
  * A full snapshot of a player's pre-arena state.
  *
  * <p>Captured on arena join and replayed on exit. Every field is a deep copy taken at capture
- * time, because the live objects keep mutating while the player is in the ladder â€” holding on
+ * time, because the live objects keep mutating while the player is in the ladder - holding on
  * to the original {@link ItemStack} references would restore an emptied stack.</p>
+ *
+ * <p>It deliberately holds no position. Walking out of a region, or being ejected from a
+ * disabled or deleted arena, leaves the player standing exactly where they were; putting them
+ * back where they started is what used to drag them across the region boundary and bounce them
+ * in and out forever.</p>
  */
 public final class SavedState {
 
@@ -37,13 +41,12 @@ public final class SavedState {
     private final boolean allowFlight;
     private final boolean flying;
     private final GameMode gameMode;
-    private final Location location;
     private final List<PotionEffect> effects;
 
     private SavedState(ItemStack[] contents, ItemStack[] armour, ItemStack[] extra, ItemStack cursor,
                        int heldSlot, int level, float experience, double health, double maxHealth,
                        int foodLevel, float saturation, int fireTicks, boolean allowFlight,
-                       boolean flying, GameMode gameMode, Location location, List<PotionEffect> effects) {
+                       boolean flying, GameMode gameMode, List<PotionEffect> effects) {
         this.contents = contents;
         this.armour = armour;
         this.extra = extra;
@@ -59,7 +62,6 @@ public final class SavedState {
         this.allowFlight = allowFlight;
         this.flying = flying;
         this.gameMode = gameMode;
-        this.location = location;
         this.effects = effects;
     }
 
@@ -81,12 +83,11 @@ public final class SavedState {
                 player.getAllowFlight(),
                 player.isFlying(),
                 player.getGameMode(),
-                player.getLocation().clone(),
                 new ArrayList<>(player.getActivePotionEffects()));
     }
 
     /**
-     * Replays the snapshot onto {@code player}.
+     * Replays the snapshot onto {@code player}, wherever they are standing.
      *
      * <p>Health is applied after the inventory because the arena kit may have changed the
      * player's max health attribute, and Bukkit rejects a {@code setHealth} above the current
@@ -122,8 +123,6 @@ public final class SavedState {
             attribute.setBaseValue(maxHealth);
         }
         player.setHealth(Math.min(health, maxHealthOf(player)));
-
-        player.teleport(location);
     }
 
     private static double maxHealthOf(Player player) {
@@ -144,7 +143,7 @@ public final class SavedState {
      *
      * <p>Used everywhere instead of a bare {@code ItemStack.clone()}. {@code clone()} is declared
      * to return {@code ItemStack} even though {@code getType()} returns {@code ItemType}, so a
-     * shallow copy is what the signature advertises — fine for the client, wrong for a snapshot
+     * shallow copy is what the signature advertises - fine for the client, wrong for a snapshot
      * that has to survive the original being mutated.</p>
      */
     private static ItemStack copyItem(ItemStack source) {
@@ -165,14 +164,10 @@ public final class SavedState {
         return new SavedState(copy(contents), copy(armour), copy(extra), copyItem(cursor),
                 heldSlot, level, experience, health,
                 maxHealth, foodLevel, saturation, fireTicks, allowFlight, flying, gameMode,
-                location.clone(), new ArrayList<>(effects));
+                new ArrayList<>(effects));
     }
 
     public Collection<PotionEffect> effects() {
         return List.copyOf(effects);
-    }
-
-    public Location location() {
-        return location.clone();
     }
 }

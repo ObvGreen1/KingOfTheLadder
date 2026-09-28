@@ -28,7 +28,7 @@ public final class CommandRegistry {
                 new WandCommand(),
                 new CreateCommand(),
                 new SetPlateCommand(),
-                new SetSpawnCommand(),
+                new RespawnCommand(),
                 new ToggleCommand(),
                 new DeleteCommand());
         subcommands.forEach(this::index);

@@ -9,7 +9,7 @@ import java.util.Set;
  *
  * <p>The dialog is the whole point of this command: it drives every arena-setting operation from
  * one screen. The individual commands ({@code wand}, {@code create}, {@code setplate},
- * {@code spawn}, {@code toggle}, {@code delete}) still exist and still work, for scripting and
+ * {@code respawn}, {@code toggle}, {@code delete}) still exist and still work, for scripting and
  * for anyone who prefers chat.</p>
  *
  * <p>Both routes run the same code. The dialog does not re-implement the setup rules; it builds a

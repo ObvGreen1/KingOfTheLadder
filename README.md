@@ -68,7 +68,7 @@ completion.
 | `/kotl wand` | `kotl.admin` | Gives the selection wand. |
 | `/kotl create <name>` | `kotl.admin` | Creates an arena from the wand's two selected corners. |
 | `/kotl setplate <name>` | `kotl.admin` | Sets the King pressure plate, using the block you are looking at. |
-| `/kotl spawn <name>` | `kotl.admin` | Sets the respawn point to your current position. |
+| `/kotl respawn <name>` | `kotl.admin` | Sets the respawn point to your current position, which must be inside the arena box. |
 | `/kotl toggle <name>` | `kotl.admin` | Enables or disables an arena. Disabling also releases anyone standing inside it. |
 | `/kotl delete <name> confirm` | `kotl.admin` | Deletes an arena. The `confirm` argument is required. |
 
@@ -81,8 +81,8 @@ Everything can be done from the dialog:
 1. `/kotl setup` — opens the setup menu.
 2. **Give me the wand**, then left-click one corner of your tower and right-click the opposite one.
 3. **New arena** — type a name and confirm. The arena is created from your selection.
-4. Open the arena's page and use **Set King plate** (look at the plate first), **Set spawn here**,
-   and **Enable arena**.
+4. Open the arena's page and use **Set King plate** (look at the plate first), **Set respawn here**
+   (stand inside the arena box), and **Enable arena**.
 
 The same steps typed by hand, if you would rather not use the dialog:
 
@@ -90,28 +90,43 @@ The same steps typed by hand, if you would rather not use the dialog:
 2. Left-click one corner, right-click the opposite corner.
 3. `/kotl create tower`
 4. Look at the King pressure plate: `/kotl setplate tower`
-5. Stand where players should respawn: `/kotl spawn tower`
+5. Stand inside the arena where players should respawn: `/kotl respawn tower`
 6. `/kotl toggle tower` to enable it.
 
 Both routes call the same subcommand classes, so a button and a typed command cannot disagree.
 
 The arena is the box between the two corners, and its `minY` is the floor: **falling below it
-puts you back at the spawn point and keeps you in the game**. Leaving the box any other way —
+puts you back on the respawn point and keeps you in the game**. Leaving the box any other way -
 walking out, `/tp`, a portal — returns your real inventory and drops you out of the arena.
+
+There are exactly three things that can happen to you in a region, and none of them moves you
+anywhere you did not walk to:
+
+| Event | What happens |
+|---|---|
+| You walk **in** | Your inventory, vitals and game mode are snapshotted, and the kit is handed to you where you stand. |
+| You walk **out** | The snapshot is replayed, so your own items, health and game mode come back. You stay where you stopped. |
+| You **die** or fall below the floor | You come back on the arena's respawn point, at full health. |
+
+An arena with no respawn point set reuses the centre of its own floor, so there is always a valid
+one. `/kotl respawn` refuses a point outside the arena box for the same reason: a respawn point
+that is not inside the region would either count as an instant knockoff or drop you straight out
+of the arena, and the region listener would put you straight back.
 
 ---
 
 ## Gameplay
 
 - Walking into an arena's region joins it, saves your real inventory, state and game mode, and
-  gives you the kit: leather armour and a **Knockback I** stick.
+  gives you the kit: leather armour and a **Knockback I** stick. Nobody is moved - you are already
+  standing in the arena.
 - Standing on the King plate claims the crown: fireworks, a title, a broadcast, and a radial
   shove that pushes everyone else away from you. Re-claiming is rate-limited by
   `king.claim-cooldown-seconds`.
 - A knockoff is credited to the **last player who hit you within 5 seconds**
   (`combat.knockback-window-seconds`). Fall on your own and nobody gets the kill.
 - PvP only applies inside an arena, and fall damage is disabled while you are in one.
-- You respawn at the arena spawn if you drop to zero health *or* fall below the arena floor.
+- You come back to the arena's respawn point if you drop to zero health *or* fall below the arena floor.
 
 ---
 
@@ -195,7 +210,7 @@ src/main/java/me/obvgreen/
   arena/                          Arena, bounds, saved state, and the ArenaManager that owns the game
   command/                        dispatcher, permission and context types, the registry, and one
                                   class per subcommand (Setup, Help, Top, ListArenas, Wand, Create,
-                                  SetPlate, SetSpawn, Toggle, Delete)
+                                  SetPlate, Respawn, Toggle, Delete)
   database/                       SQLite (WAL), PlayerStats, StatCategory, RankEntry
   dialog/
     DialogView.java               shared registry-dialog plumbing

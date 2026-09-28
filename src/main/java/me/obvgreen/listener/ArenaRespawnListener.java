@@ -13,7 +13,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import java.util.Optional;
 
 /**
- * Respawn inside an arena: back on the arena's spawn point, at full health.
+ * Respawn inside an arena: back on the arena's respawn point, at full health.
  */
 public final class ArenaRespawnListener implements Listener {
 
@@ -25,7 +25,7 @@ public final class ArenaRespawnListener implements Listener {
         this.arenas = arenas;
     }
 
-    /** Puts the victim back on the arena spawn rather than the world spawn. */
+    /** Puts the victim back on the arena's respawn point rather than the world spawn. */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
@@ -34,7 +34,7 @@ public final class ArenaRespawnListener implements Listener {
             return;
         }
         arena.get().resolveWorld().ifPresent(world ->
-                event.setRespawnLocation(arena.get().spawnOrCentre().toLocation(world)));
+                event.setRespawnLocation(arena.get().respawnOrCentre().toLocation(world)));
         // Applied on the next tick: the attribute is reset by the respawn itself.
         Bukkit.getScheduler().runTask(plugin, () -> arenas.healFully(player));
     }

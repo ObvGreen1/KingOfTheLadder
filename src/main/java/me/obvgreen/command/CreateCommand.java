@@ -2,7 +2,6 @@ package me.obvgreen.command;
 
 import me.obvgreen.arena.Arena;
 import me.obvgreen.arena.ArenaManager;
-import me.obvgreen.arena.BlockPos;
 import org.bukkit.entity.Player;
 
 import java.util.Locale;
@@ -78,14 +77,19 @@ public final class CreateCommand implements KotlSubcommand {
             return true;
         }
 
-        BlockPos spawn = BlockPos.of(player.getLocation());
+        // No respawn point yet: the region floor's centre is the default until
+        // /kotl respawn says otherwise. Taking the admin's feet here used to bake a
+        // one-off position into the arena with no way to tell it apart from a chosen one.
         Arena arena = Arena.of(name, selection.first().world(),
-                selection.first(), selection.second(), spawn, null, true);
+                selection.first(), selection.second(), null, null, true);
         arenas.saveArena(arena);
         arenas.clearSelection(player);
 
         context.success("Created arena <white>" + name + "<green>.");
-        context.info("Next: look at the King pressure plate and run <white>/kotl setplate " + name);
+        context.info("Nobody is teleported in or out: players get the kit when they walk in, and "
+                + "their own items back when they walk out.");
+        context.info("Next: stand where players should respawn and run <white>/kotl respawn " + name
+                + "<gray>, or look at the King plate and run <white>/kotl setplate " + name);
         return true;
     }
 

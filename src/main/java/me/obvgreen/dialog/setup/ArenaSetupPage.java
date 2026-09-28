@@ -54,8 +54,10 @@ final class ArenaSetupPage {
         body.add(DialogView.line(arena.hasKingPlate()
                 ? "<gray>King plate: <white>" + arena.kingPlate()
                 : "<yellow>King plate: <red>not set <dark_gray>(nobody can claim the crown)"));
-        body.add(DialogView.line("<gray>Spawn: <white>"
-                + (arena.spawn() == null ? "<red>unset" : arena.spawn().toString())));
+        body.add(DialogView.line(arena.respawn() == null
+                ? "<gray>Respawn: <white>" + arena.respawnOrCentre()
+                        + " <dark_gray>(region floor, not set yet)"
+                : "<gray>Respawn: <white>" + arena.respawn()));
         body.add(DialogView.line("<gray>Players inside: <white>"
                 + arenas.occupants(arena).size()));
         body.add(DialogView.gap());
@@ -73,11 +75,11 @@ final class ArenaSetupPage {
                 }));
 
         buttons.add(view.button(
-                "<yellow>Set spawn here",
-                "<gray>Uses the block you are standing on",
+                "<yellow>Set respawn here",
+                "<gray>Uses the block you are standing on, which must be inside the arena box",
                 200,
                 clicker -> {
-                    SetupActions.run(plugin, clicker, "spawn", arena.name());
+                    SetupActions.run(plugin, clicker, "respawn", arena.name());
                     open(clicker, arena.name());
                 }));
 
@@ -119,7 +121,7 @@ final class ArenaSetupPage {
     private void confirmDelete(Player player, String arenaName) {
         List<DialogBody> body = List.of(
                 DialogView.line("<red>This permanently removes <white>" + arenaName + "<red>."),
-                DialogView.line("<gray>Its bounds, spawn and King plate are gone. Players inside are "
+                DialogView.line("<gray>Its bounds, respawn point and King plate are gone. Players inside are "
                         + "released first."),
                 DialogView.gap(),
                 DialogView.line("<gray>The same as typing <white>/kotl delete " + arenaName
